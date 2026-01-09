@@ -1,0 +1,36 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 1: Authenticate to Google Cloud
+      - name: Authenticate GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Step 2: Set up GKE credentials dynamically
+      - name: Configure kubectl for GKE
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.CLUSTER_NAME }} \
+            --zone ${{ secrets.CLUSTER_ZONE }} \
+            --project ${{ secrets.GCP_PROJECT }}
+
+      # Step 3: Test kubectl access
+      - name: Check GKE nodes
+        run: kubectl get nodes
+
+      # Step 4: Deploy your Kubernetes manifests
+      - name: Deploy to GKE
+        run: |
+          kubectl apply -f k8s/
