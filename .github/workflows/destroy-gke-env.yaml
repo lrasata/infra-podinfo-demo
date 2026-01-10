@@ -48,11 +48,11 @@ jobs:
         working-directory: terraform/live/${{ github.event.inputs.environment }}
         run: terraform init
 
-      - name: Terraform Destroy (Delete GKE Cluster)
-        working-directory: terraform/live/${{ github.event.inputs.environment }}
-        run: terraform destroy -auto-approve
-
       - name: Delete Namespace
         run: |
           gcloud container clusters get-credentials "$CLUSTER_NAME" --region "$ZONE" --project "$PROJECT_ID"
           kubectl delete namespace ${{ github.event.inputs.environment }} --ignore-not-found
+
+      - name: Terraform Destroy (Delete GKE Cluster)
+        working-directory: terraform/live/${{ github.event.inputs.environment }}
+        run: terraform destroy -auto-approve
