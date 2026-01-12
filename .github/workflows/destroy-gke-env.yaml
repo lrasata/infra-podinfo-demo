@@ -1,4 +1,4 @@
-name: Destroy Podinfo Environment
+name: Destroy GKE Cluster Environment
 
 on:
   workflow_dispatch:

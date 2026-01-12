@@ -1,4 +1,4 @@
-name: Deploy Podinfo to GKE
+name: Set up GKE cluster Automated Pipeline
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ on:
           - dev
 
 jobs:
-  deploy:
+  terraform-apply:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     env:
@@ -25,6 +25,9 @@ jobs:
       TF_VAR_zone: ${{ secrets.GCP_ZONE }}
       TF_VAR_node_count: 1
       TF_VAR_machine_type: "e2-small"
+    defaults:
+      run:
+        working-directory: terraform/live/${{ github.event.inputs.environment }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -54,18 +57,58 @@ jobs:
         working-directory: terraform/live/${{ github.event.inputs.environment }}
         run: terraform apply -auto-approve
 
+  setup-ingress:
+    runs-on: ubuntu-latest
+    needs: terraform-apply
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Authenticate to GKE
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
+          location: ${{ secrets.GKE_CLUSTER_LOCATION }}
+
+      - name: Install NGINX Ingress Controller
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/cloud/deploy.yaml
+
+  helm-deploy:
+    runs-on: ubuntu-latest
+    needs: setup-ingress
+    env:
+      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
+      ZONE: ${{ secrets.GCP_ZONE }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
       - name: Get GKE Credentials
         run: |
           gcloud container clusters get-credentials "$CLUSTER_NAME" --region "$ZONE" --project "$PROJECT_ID"
-
 
       - name: Add Podinfo Helm repo
         run: |
           helm repo add podinfo https://stefanprodan.github.io/podinfo
           helm repo update
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
 
       - name: Deploy with Helm
         run: |
@@ -74,3 +117,4 @@ jobs:
             --wait \
             --create-namespace \
             -f kubernetes/overlays/${{ github.event.inputs.environment }}/values.yaml
+          kubectl apply -f kubernetes/base/ingress/ingress.yaml
