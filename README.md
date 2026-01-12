@@ -4,6 +4,8 @@
 > 	🚧 Construction in progress
 >
 
+![Setup GKE cluster](https://github.com/lrasata/infra-podinfo-demo/actions/workflows/setup-cluster.yaml/badge.svg)
+
 This repository contains infrastructure-as-code and configuration for deploying the [podinfo](https://github.com/stefanprodan/podinfo) demo application on Google Kubernetes Engine (GKE), with supporting observability and Terraform modules.
 
 ## Project Structure
