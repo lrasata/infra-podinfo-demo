@@ -61,6 +61,27 @@ kubectl apply -k kubernetes/overlays/dev
 
 Replace `dev` with `staging` or `prod` as needed.
 
+#### Accessing Your Application
+
+After deployment, you can access your app via the Ingress external IP:
+
+1. Get the external IP of the Ingress:
+	```sh
+	gcloud container clusters get-credentials <cluster-name> --region <region> --project <project-id>
+	kubectl get ingress -n dev
+	```
+	(or use the appropriate namespace)
+
+2. Find the ADDRESS column in the output. This is your app's external IP.
+
+3. Open your browser and visit:
+	```
+	http://<EXTERNAL_IP>/
+	```
+	(Replace <EXTERNAL_IP> with the value from step 2)
+
+If you don’t see an IP, wait a few minutes and check again.
+
 ### 3. Set Up Observability
 
 Apply the manifests in the `observability/` directory to deploy Grafana, Loki, and Prometheus:
