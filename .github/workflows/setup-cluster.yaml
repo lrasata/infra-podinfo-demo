@@ -24,7 +24,7 @@ jobs:
       TF_VAR_region: ${{ secrets.GCP_REGION }}
       TF_VAR_zone: ${{ secrets.GCP_ZONE }}
       TF_VAR_node_count: 1
-      TF_VAR_machine_type: "e2-small"
+      TF_VAR_machine_type: "e2-medium" # e2-small and e2-micro are too small for resources needed
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -152,3 +152,58 @@ jobs:
 
       - name: Apply custom Ingress manifest
         run: kubectl apply -f kubernetes/base/ingress/ingress.yaml
+  
+  observability:
+    runs-on: ubuntu-latest
+    needs: helm-deploy
+    environment: ${{ github.event.inputs.environment }}
+    env:
+      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
+      ZONE: ${{ secrets.GCP_ZONE }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+
+      - name: Add Google Cloud SDK distribution URI as apt source
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          sudo apt-get install -y apt-transport-https ca-certificates
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update
+
+      - name: Install gke-gcloud-auth-plugin
+        run: sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials "$CLUSTER_NAME" --zone "$ZONE" --project "$PROJECT_ID"
+
+      - name: Add Prometheus Helm repo
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+      - name: Install / Upgrade kube-prometheus-stack (Grafana subpath)
+        run: |
+          helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+            --namespace monitoring \
+            --create-namespace \
+            --wait \
+            -f kubernetes/monitoring/grafana-values.yaml
+
+      - name: Apply Grafana Ingress
+        run: kubectl apply -f kubernetes/base/ingress/grafana-ingress.yaml
