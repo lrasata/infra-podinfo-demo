@@ -157,6 +157,10 @@ jobs:
 
       - name: Apply custom Ingress manifest
         run: kubectl apply -f kubernetes/base/ingress/ingress.yaml
+
+      - name: Deploy ServiceMonitor for podinfo
+        run: |
+          kubectl apply -f kubernetes/monitoring/podinfo-servicemonitor.yaml
   
   observability:
     runs-on: ubuntu-latest
