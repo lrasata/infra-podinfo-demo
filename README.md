@@ -84,13 +84,54 @@ If you don’t see an IP, wait a few minutes and check again.
 
 ### 3. Set Up Observability
 
-Apply the manifests in the `observability/` directory to deploy Grafana, Loki, and Prometheus:
+#### Grafana Ingress Basic Auth Setup
+
+To secure the Grafana Ingress with basic authentication, follow these steps:
+
+##### 1. Generate Basic Auth Credentials
+
+You can generate a basic auth string using `htpasswd` (from the `apache2-utils` package) or with OpenSSL:
+
+**Using htpasswd:**
+```sh
+htpasswd -nb <username> <password>
+```
+This will output a string like `user:$apr1$...`.
+
+**Using OpenSSL (alternative):**
+```sh
+echo -n '<username>:<password>' | openssl base64
+```
+This outputs a base64-encoded string for use in basic auth.
+
+##### 2. Set Up GitHub Actions Secret
+
+Add the generated basic auth string as a secret in your GitHub repository:
+
+- Go to your repository on GitHub
+- Navigate to **Settings** > **Secrets and variables** > **Actions**
+- Click **New repository secret**
+- Name the secret: `GRAFANA_BASIC_AUTH`
+- Paste the generated value as the secret value
+
+##### 3. Reference the Secret in GitHub Actions
+
+In your GitHub Actions workflow (e.g., `setup-cluster.yaml`), reference the secret as an environment variable:
+
+```yaml
+env:
+	GRAFANA_BASIC_AUTH: ${{ secrets.GRAFANA_BASIC_AUTH }}
+```
+
+Use this value when creating the Kubernetes secret for Grafana Ingress basic auth, for example:
 
 ```sh
-kubectl apply -f observability/grafana/
-kubectl apply -f observability/loki/
-kubectl apply -f observability/prometheus/
+kubectl create secret generic grafana-basic-auth \
+	--from-literal=auth="${GRAFANA_BASIC_AUTH}" \
+	-n monitoring
 ```
+
+Or, in your deployment scripts, ensure the secret is created using the value from the GitHub Actions environment.
 
 ## Folder Details
 

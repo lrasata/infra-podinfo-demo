@@ -1,7 +1,7 @@
 name: Set up GKE cluster Automated Pipeline
 
 # This pipeline provisions (1) a GKE cluster with Terraform, 
-# (2) bootstraps ingress and observability, 
+# (2) bootstraps ingress and observability (prometheus + grafana), 
 # (3) deploys workloads via Helm, 
 # (4) and secures Grafana using GitHub Secrets and Kubernetes-native authentication.
 
@@ -160,7 +160,7 @@ jobs:
 
       - name: Deploy ServiceMonitor for podinfo
         run: |
-          kubectl apply -f kubernetes/monitoring/podinfo-servicemonitor.yaml
+          kubectl apply -f observability/prometheus/podinfo-servicemonitor.yaml
   
   observability:
     runs-on: ubuntu-latest
@@ -213,7 +213,7 @@ jobs:
             --namespace monitoring \
             --create-namespace \
             --wait \
-            -f kubernetes/monitoring/grafana-values.yaml
+            -f observability/grafana/values.yaml
 
       - name: Create Grafana Basic Auth secret
         run: |
