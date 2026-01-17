@@ -6,7 +6,51 @@
 
 ![Setup GKE cluster](https://github.com/lrasata/infra-podinfo-demo/actions/workflows/setup-cluster.yaml/badge.svg)
 
-This repository contains infrastructure-as-code and configuration for deploying the [podinfo](https://github.com/stefanprodan/podinfo) demo application on Google Kubernetes Engine (GKE), with supporting observability and Terraform modules.
+
+## Architecture Overview
+
+This project provisions a Google Kubernetes Engine (GKE) cluster using Terraform, then deploys the [podinfo](https://github.com/stefanprodan/podinfo) demo application with Kubernetes manifests and Helm. It includes:
+
+- **Infrastructure-as-Code (Terraform):** Automates GKE cluster creation and management, ensuring reproducibility and easy environment setup.
+- **Kubernetes Manifests & Kustomize:** Manages application deployment, ingress, and environment-specific overlays for dev, staging, and prod.
+- **Observability Stack:** Deploys Grafana, Loki, and Prometheus for monitoring and logging, with secure access via Ingress and basic authentication.
+- **CI/CD Automation:** GitHub Actions pipeline automates provisioning, deployment, and observability setup.
+
+#### High-Level Architecture Diagram
+
+```
+┌─────────────────────────────┐
+│      Google Cloud (GCP)     │
+│ ┌─────────────────────────┐ │
+│ │      GKE Cluster        │ │
+│ │ ┌─────────────────────┐ │ │
+│ │ │   podinfo app       │ │ │
+│ │ └─────────────────────┘ │ │
+│ │ ┌─────────────────────┐ │ │
+│ │ │ Observability stack │ │ │
+│ │ │ (Grafana,           │ │ │
+│ │ │  Prometheus)        │ │ │
+│ │ └─────────────────────┘ │ │
+│ │ ┌─────────────────────┐ │ │
+│ │ │   Ingress (NGINX)   │ │ │
+│ │ └─────────────────────┘ │ │
+│ └─────────────────────────┘ │
+└─────────────────────────────┘
+```
+
+### The Goal of this project
+
+> 
+> This project is **ideal for learning, prototyping, or as a foundation** for production workloads on GKE with modern DevOps practices.
+>
+
+- **Production-Ready Patterns:** Uses best practices for cloud-native infrastructure, including declarative IaC, environment overlays, and automated CI/CD.
+- **Scalability & Flexibility:** Easily extendable to more environments, services, or cloud providers.
+- **Observability Built-In:** Monitoring and logging are first-class citizens, enabling rapid troubleshooting and performance insights.
+- **Security:** Ingress is secured with basic auth, and secrets are managed via GitHub Actions and Kubernetes.
+- **Learning & Reusability:** Serves as a reference for real-world GKE deployments, Terraform usage, and Kubernetes operations. Can be adapted for other apps or teams.
+
+
 
 ## Project Structure
 
@@ -33,6 +77,7 @@ infra-podinfo-demo/
 ## Getting Started
 
 ### Prerequisites
+
 - [Terraform](https://www.terraform.io/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - Access to a Google Cloud Platform (GCP) project
@@ -133,11 +178,6 @@ kubectl create secret generic grafana-basic-auth \
 
 Or, in your deployment scripts, ensure the secret is created using the value from the GitHub Actions environment.
 
-## Folder Details
-
-- **kubernetes/**: Kubernetes manifests and Kustomize overlays for different environments.
-- **observability/**: Monitoring and logging stack configuration.
-- **terraform/**: Infrastructure provisioning code, organized by environment and reusable modules.
 
 ## References
 - [podinfo](https://github.com/stefanprodan/podinfo)
