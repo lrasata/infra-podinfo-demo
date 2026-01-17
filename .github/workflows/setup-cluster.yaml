@@ -1,5 +1,10 @@
 name: Set up GKE cluster Automated Pipeline
 
+# This pipeline provisions (1) a GKE cluster with Terraform, 
+# (2) bootstraps ingress and observability, 
+# (3) deploys workloads via Helm, 
+# (4) and secures Grafana using GitHub Secrets and Kubernetes-native authentication.
+
 on:
   workflow_dispatch:
     inputs:
@@ -162,6 +167,7 @@ jobs:
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
       ZONE: ${{ secrets.GCP_ZONE }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -204,6 +210,14 @@ jobs:
             --create-namespace \
             --wait \
             -f kubernetes/monitoring/grafana-values.yaml
+
+      - name: Create Grafana Basic Auth secret
+        run: |
+          kubectl create secret generic grafana-basic-auth \
+            --from-literal=auth="${{ secrets.GRAFANA_BASIC_AUTH }}" \
+            -n monitoring \
+            --dry-run=client -o yaml | kubectl apply -f -
+
 
       - name: Apply Grafana Ingress
         run: kubectl apply -f kubernetes/base/ingress/grafana-ingress.yaml
