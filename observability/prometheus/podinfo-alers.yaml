@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: podinfo-alerts
+  namespace: dev   # <-- same namespace as podinfo
+  labels:
+    release: monitoring # <-- must match Prometheus release selector
+spec:
+  groups:
+    - name: podinfo.rules
+      rules:
+        - alert: PodinfoDown
+          expr: up{job="podinfo"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Podinfo is down"
+            description: "Podinfo has not been reachable for more than 1 minute."
+        - alert: PodinfoHighErrorRate
+          expr: |
+            (
+              sum(rate(http_requests_total{job="podinfo",code=~"5.."}[2m]))
+              /
+              sum(rate(http_requests_total{job="podinfo"}[2m]))
+            ) > 0.05
+            and
+            sum(rate(http_requests_total{job="podinfo"}[2m])) > 1
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High error rate on Podinfo"
+            description: "More than 5% of requests are failing."
+
