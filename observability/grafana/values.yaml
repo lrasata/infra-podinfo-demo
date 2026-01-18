@@ -4,3 +4,19 @@ grafana:
       root_url: "%(protocol)s://%(domain)s/grafana"
       serve_from_sub_path: true
   defaultDashboardsEnabled: true
+
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+    portName: http-metrics  # different port for metrics
+
+service:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+
+    - name: http-metrics
+      port: 9100
+      targetPort: 9100
