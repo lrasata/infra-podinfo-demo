@@ -1,7 +1,6 @@
 grafana:
   grafana.ini:
     server:
-      root_url: "%(protocol)s://%(http_addr)s:%(http_port)s/grafana"
+      root_url: "%(protocol)s://%(http_addr)s:%(http_port)s/grafana/"
       serve_from_sub_path: true
       enforce_domain: false
-  defaultDashboardsEnabled: true
