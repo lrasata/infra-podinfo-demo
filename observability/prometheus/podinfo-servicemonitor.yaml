@@ -2,17 +2,17 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: podinfo-servicemonitor
-  namespace: dev       # match your podinfo namespace
+  namespace: dev
   labels:
-    release: monitoring  # must match Prometheus release selector
+    release: monitoring
 spec:
   selector:
     matchLabels:
-      app: podinfo      # must match podinfo service labels
+      app: podinfo
   namespaceSelector:
     matchNames:
-      - dev            # namespace of the service
+      - dev
   endpoints:
-    - port: metrics     # service port name or number
+    - port: metrics
       path: /metrics
       interval: 15s

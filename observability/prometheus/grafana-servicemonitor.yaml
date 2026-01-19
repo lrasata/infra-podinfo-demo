@@ -1,18 +1,19 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: ingress-nginx
+  name: monitoring-grafana
   namespace: monitoring
   labels:
     release: monitoring
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/name: grafana
   namespaceSelector:
     matchNames:
-      - ingress-nginx
+      - monitoring
   endpoints:
-    - port: metrics
+    - port: http-metrics   # Grafana metrics port
       path: /metrics
       interval: 30s
+      scheme: http

@@ -85,11 +85,6 @@ jobs:
         run: |
           kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=120s
 
-      # Ensure metrics port exists on ingress-nginx service
-      - name: Ensure ingress-nginx metrics port
-        run: |
-          kubectl apply -f kubernetes/base/ingress/ingress-nginx-service-metrics.yaml
-
 
   helm-deploy:
     runs-on: ubuntu-latest
@@ -137,7 +132,7 @@ jobs:
             --wait \
             -f kubernetes/overlays/dev/values.yaml
 
-      - run: kubectl apply -f kubernetes/base/ingress/ingress.yaml
+      - run: kubectl apply -f kubernetes/base/ingress/podinfo-ingress.yaml
 
   observability:
     runs-on: ubuntu-latest
@@ -174,25 +169,43 @@ jobs:
           gcloud container clusters get-credentials "$CLUSTER_NAME" \
             --zone "$ZONE" --project "$PROJECT_ID"
 
-      - run: |
+      # ---- Create monitoring namespace ----
+      - name: Create monitoring namespace
+        run: |
+          kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+      
+      # ---- Grafana Basic Auth Secret ----
+      - name: Create Grafana basic auth secret
+        run: |
+          kubectl create secret generic grafana-basic-auth \
+            --from-literal=auth="$GRAFANA_BASIC_AUTH" \
+            -n monitoring \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      # ---- Deploy kube-prometheus-stack with Grafana metrics enabled ----
+      - name: Deploy Prometheus + Grafana
+        run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
           helm repo update
-
-      - run: |
           helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
             --namespace monitoring \
             --create-namespace \
             --wait \
             -f observability/grafana/values.yaml
 
-      - run: kubectl apply -f observability/prometheus/podinfo-servicemonitor.yaml
-      - run: kubectl apply -f observability/prometheus/podinfo-alerts.yaml
-      - run: kubectl apply -f observability/prometheus/ingress-nginx-servicemonitor.yaml
+      # ---- Apply Grafana ServiceMonitor ----
+      - name: Apply Grafana ServiceMonitor
+        run: |
+          kubectl apply -f observability/prometheus/grafana-servicemonitor.yaml
 
-      - run: |
-          kubectl create secret generic grafana-basic-auth \
-            --from-literal=auth="$GRAFANA_BASIC_AUTH" \
-            -n monitoring \
-            --dry-run=client -o yaml | kubectl apply -f -
+      # ---- Apply ServiceMonitors on Podinfo + alerts ----
+      - name: Apply podinfo ServiceMonitors and Alerts
+        run: |
+          kubectl apply -f observability/prometheus/podinfo-servicemonitor.yaml
+          kubectl apply -f observability/prometheus/podinfo-alerts.yaml
 
-      - run: kubectl apply -f kubernetes/base/ingress/grafana-ingress.yaml
+      # ---- Deploy Grafana ingress ----
+      - name: Apply Grafana ingress
+        run: |
+          kubectl apply -f kubernetes/base/ingress/grafana-ingress.yaml
+

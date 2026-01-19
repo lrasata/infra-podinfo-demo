@@ -64,7 +64,6 @@ infra-podinfo-demo/
 │       └── prod/
 ├── observability/
 │   ├── grafana/             # Grafana configuration
-│   ├── loki/                # Loki configuration
 │   └── prometheus/          # Prometheus configuration
 └── terraform/
 	├── live/                # Live environment deployments
@@ -121,7 +120,8 @@ After deployment, you can access your app via the Ingress external IP:
 
 3. Open your browser and visit:
 	```
-	http://<EXTERNAL_IP>/
+	http://<EXTERNAL_IP>/app/ # podinfo app
+	http://<EXTERNAL_IP>/grafana/ # grafana dashboard
 	```
 	(Replace <EXTERNAL_IP> with the value from step 2)
 
