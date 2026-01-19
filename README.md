@@ -135,7 +135,7 @@ To secure the Grafana Ingress with basic authentication, follow these steps:
 
 ##### 1. Generate Basic Auth Credentials
 
-You can generate a basic auth string using `htpasswd` (from the `apache2-utils` package) or with OpenSSL:
+You can generate a basic auth string using `htpasswd` (from the `apache2-utils` package):
 
 **Using htpasswd:**
 ```sh
@@ -143,11 +143,6 @@ htpasswd -nb <username> <password>
 ```
 This will output a string like `user:$apr1$...`.
 
-**Using OpenSSL (alternative):**
-```sh
-echo -n '<username>:<password>' | openssl base64
-```
-This outputs a base64-encoded string for use in basic auth.
 
 ##### 2. Set Up GitHub Actions Secret
 

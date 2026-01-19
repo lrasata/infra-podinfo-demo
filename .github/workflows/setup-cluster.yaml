@@ -144,6 +144,7 @@ jobs:
       CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
       ZONE: ${{ secrets.GCP_ZONE }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GRAFANA_BASIC_AUTH: ${{ secrets.GRAFANA_BASIC_AUTH }}
     steps:
       - uses: actions/checkout@v4
 
@@ -185,7 +186,7 @@ jobs:
 
       - run: |
           kubectl create secret generic grafana-basic-auth \
-            --from-literal=auth="${{ secrets.GRAFANA_BASIC_AUTH }}" \
+            --from-literal=auth="$GRAFANA_BASIC_AUTH" \
             -n monitoring \
             --dry-run=client -o yaml | kubectl apply -f -
 
