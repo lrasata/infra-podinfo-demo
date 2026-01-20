@@ -1,22 +1,26 @@
-# infra-podinfo-demo 🚧 
+# infra-podinfo-demo 🚧
 
->
-> 	🚧 Construction in progress
->
+> 🚧 Construction in progress
 
 ![Setup GKE cluster](https://github.com/lrasata/infra-podinfo-demo/actions/workflows/setup-cluster.yaml/badge.svg)
 
+## Overview
+
+This project is my first hands-on experience with Kubernetes. It showcases a full end-to-end infrastructure setup using **Terraform, GKE, Kubernetes, Helm, NGINX Ingress, Grafana, and Prometheus**, all provisioned via a **GitHub Actions CI/CD pipeline**.
+
+It is designed to be **educational, reusable, and production-ready** for learning, prototyping, or as a foundation for real-world workloads on GKE with modern DevOps practices.
+
+## Key Features
+
+* **Production-Ready Patterns:** Implements cloud-native best practices with declarative IaC, environment overlays, and automated CI/CD.
+* **Scalability & Flexibility:** Easily extendable to more environments, services, or cloud providers.
+* **Built-In Observability:** Prometheus and Grafana are deployed for monitoring and logging, providing rapid insights and troubleshooting.
+* **Security:** Grafana Ingress is secured with basic auth, and secrets are managed via GitHub Actions and Kubernetes.
+* **Learning & Reusability:** Serves as a reference for real-world GKE deployments, Terraform usage, and Kubernetes operations. Can be adapted for other apps or teams.
 
 ## Architecture Overview
 
-This project provisions a Google Kubernetes Engine (GKE) cluster using Terraform, then deploys the [podinfo](https://github.com/stefanprodan/podinfo) demo application with Kubernetes manifests and Helm. It includes:
-
-- **Infrastructure-as-Code (Terraform):** Automates GKE cluster creation and management, ensuring reproducibility and easy environment setup.
-- **Kubernetes Manifests & Kustomize:** Manages application deployment, ingress, and environment-specific overlays for dev, staging, and prod.
-- **Observability Stack:** Deploys Grafana, Loki, and Prometheus for monitoring and logging, with secure access via Ingress and basic authentication.
-- **CI/CD Automation:** GitHub Actions pipeline automates provisioning, deployment, and observability setup.
-
-#### High-Level Architecture Diagram
+This project provisions a **GKE cluster using Terraform** and deploys the [podinfo](https://github.com/stefanprodan/podinfo) demo application with Kubernetes manifests and Helm. It also sets up an **observability stack** (Prometheus & Grafana) and a secure NGINX Ingress.
 
 ```
 ┌─────────────────────────────┐
@@ -38,20 +42,6 @@ This project provisions a Google Kubernetes Engine (GKE) cluster using Terraform
 └─────────────────────────────┘
 ```
 
-### The Goal of this project
-
-> 
-> This project is **ideal for learning, prototyping, or as a foundation** for production workloads on GKE with modern DevOps practices.
->
-
-- **Production-Ready Patterns:** Uses best practices for cloud-native infrastructure, including declarative IaC, environment overlays, and automated CI/CD.
-- **Scalability & Flexibility:** Easily extendable to more environments, services, or cloud providers.
-- **Observability Built-In:** Monitoring and logging are first-class citizens, enabling rapid troubleshooting and performance insights.
-- **Security:** Ingress is secured with basic auth, and secrets are managed via GitHub Actions and Kubernetes.
-- **Learning & Reusability:** Serves as a reference for real-world GKE deployments, Terraform usage, and Kubernetes operations. Can be adapted for other apps or teams.
-
-
-
 ## Project Structure
 
 ```
@@ -66,115 +56,105 @@ infra-podinfo-demo/
 │   ├── grafana/             # Grafana configuration
 │   └── prometheus/          # Prometheus configuration
 └── terraform/
-	├── live/                # Live environment deployments
-	│   ├── dev/
-	│   ├── staging/
-	│   └── prod/
-	└── modules/             # Reusable Terraform modules (gke, iam, vpc)
+    ├── live/                # Live environment deployments
+    │   ├── dev/
+    │   ├── staging/
+    │   └── prod/
+    └── modules/             # Reusable Terraform modules (gke)
 ```
 
 ## Getting Started
 
-### Prerequisites
+### Required Environment Variables for CI/CD Pipeline
 
-- [Terraform](https://www.terraform.io/)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- Access to a Google Cloud Platform (GCP) project
+| Variable Name      | Description                                  | Example Value / Notes                                      |
+| ------------------ | -------------------------------------------- | ---------------------------------------------------------- |
+| GCP_SA_KEY         | Google Cloud service account key (JSON)      | (Secret) JSON string                                       |
+| GCP_PROJECT_ID     | Google Cloud project ID                      | my-gcp-project-id                                          |
+| GKE_CLUSTER_NAME   | Name of the GKE cluster                      | my-gke-cluster                                             |
+| GCP_ZONE           | GCP zone for the cluster                     | us-central1-a                                              |
+| GCP_REGION         | GCP region for the cluster                   | us-central1                                                |
+| GRAFANA_BASIC_AUTH | Grafana Ingress basic auth (htpasswd output) | admin:$apr1$... // see section How to Set Up Observability |
+
+These variables must be set as GitHub repository secrets for the pipeline to run successfully. You can configure them in your repository under **Settings > Secrets and variables > Actions**.
 
 ### 1. Provision Infrastructure with Terraform
 
-Navigate to the desired environment (e.g., `dev`):
+To provision the GKE cluster and all supporting resources, simply run the CI/CD pipeline provided in this repository. The pipeline will automatically handle infrastructure creation, application deployment, and observability setup for you.
 
-```sh
-cd terraform/live/dev
-terraform init
-terraform plan -var-file=dev.tfvars
-terraform apply -var-file=dev.tfvars
-```
+You can trigger the pipeline manually from the GitHub Actions tab, or by using the workflow dispatch feature for your desired environment (e.g., dev, staging, prod).
 
-This will provision the GKE cluster and supporting resources using the modules defined in `terraform/modules/`.
-
-### 2. Deploy Kubernetes Resources
-
-Update your kubeconfig to point to the new GKE cluster, then apply the manifests:
-
-```sh
-gcloud container clusters get-credentials <cluster-name> --region <region> --project <project-id>
-kubectl apply -k kubernetes/overlays/dev
-```
-
-Replace `dev` with `staging` or `prod` as needed.
-
-#### Accessing Your Application
+### 2. Accessing Podinfo Application
 
 After deployment, you can access your app via the Ingress external IP:
 
 1. Get the external IP of the Ingress:
-	```sh
-	gcloud container clusters get-credentials <cluster-name> --region <region> --project <project-id>
-	kubectl get ingress -n dev
-	```
-	(or use the appropriate namespace)
 
-2. Find the ADDRESS column in the output. This is your app's external IP.
+```sh
+gcloud container clusters get-credentials <cluster-name> --region <region> --project <project-id>
+kubectl get ingress -n dev
+```
+
+2. Find the `ADDRESS` column in the output. This is your app's external IP.
 
 3. Open your browser and visit:
-	```
-	http://<EXTERNAL_IP>/app/ # podinfo app
-	http://<EXTERNAL_IP>/grafana/ # grafana dashboard
-	```
-	(Replace <EXTERNAL_IP> with the value from step 2)
 
-If you don’t see an IP, wait a few minutes and check again.
+```
+http://<EXTERNAL_IP>/app/ # podinfo app
+```
 
-### 3. Set Up Observability
+Replace `<EXTERNAL_IP>` with the value from step 2.
 
-#### Grafana Ingress Basic Auth Setup
+For Grafana:
 
-To secure the Grafana Ingress with basic authentication, follow these steps:
+```
+http://<EXTERNAL_IP>/grafana/ # Grafana dashboard
+```
 
-##### 1. Generate Basic Auth Credentials
+* Replace `<EXTERNAL_IP>` with the value from step 2
+* Enter the username and password generated via htpasswd during the [Observability Set Up](#how-to-set-up-observability)
+* To retrieve Grafana admin password:
 
-You can generate a basic auth string using `htpasswd` (from the `apache2-utils` package):
+  ```sh
+  kubectl get secret monitoring-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode
+  ```
 
-**Using htpasswd:**
+## How to Set Up Observability
+
+### Grafana Ingress Basic Auth Setup
+
+#### 1. Generate Basic Auth Credentials
+
 ```sh
 htpasswd -nb <username> <password>
 ```
+
 This will output a string like `user:$apr1$...`.
 
+#### 2. Set Up GitHub Actions Secret
 
-##### 2. Set Up GitHub Actions Secret
+* Go to your repository on GitHub
+* Navigate to **Settings** > **Secrets and variables** > **Actions**
+* Click **New repository secret**
+* Name the secret: `GRAFANA_BASIC_AUTH`
+* Paste the generated value as the secret value
 
-Add the generated basic auth string as a secret in your GitHub repository:
-
-- Go to your repository on GitHub
-- Navigate to **Settings** > **Secrets and variables** > **Actions**
-- Click **New repository secret**
-- Name the secret: `GRAFANA_BASIC_AUTH`
-- Paste the generated value as the secret value
-
-##### 3. Reference the Secret in GitHub Actions
-
-In your GitHub Actions workflow (e.g., `setup-cluster.yaml`), reference the secret as an environment variable:
+#### 3. Reference the Secret in GitHub Actions
 
 ```yaml
 env:
-	GRAFANA_BASIC_AUTH: ${{ secrets.GRAFANA_BASIC_AUTH }}
+  GRAFANA_BASIC_AUTH: ${{ secrets.GRAFANA_BASIC_AUTH }}
 ```
 
-Use this value when creating the Kubernetes secret for Grafana Ingress basic auth, for example:
+Use this value when creating the Kubernetes secret for Grafana Ingress basic auth:
 
 ```sh
 kubectl create secret generic grafana-basic-auth \
-	--from-literal=auth="${GRAFANA_BASIC_AUTH}" \
-	-n monitoring
+  --from-literal=auth="${GRAFANA_BASIC_AUTH}" \
+  -n monitoring
 ```
 
-Or, in your deployment scripts, ensure the secret is created using the value from the GitHub Actions environment.
-
-
 ## References
-- [podinfo](https://github.com/stefanprodan/podinfo)
-- [Terraform GKE Module](https://registry.terraform.io/modules/terraform-google-modules/kubernetes-engine/google/latest)
 
+* [podinfo](https://github.com/stefanprodan/podinfo)
+* [Terraform GKE Module](https://registry.terraform.io/modules/terraform-google-modules/kubernetes-engine/google/latest)
