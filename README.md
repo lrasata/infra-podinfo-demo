@@ -6,23 +6,41 @@
 
 ## Overview
 
-This project is beginner-friendly hands-on experience with Kubernetes. It showcases a full end-to-end infrastructure setup using **Terraform, GKE, Kubernetes, Helm, NGINX Ingress, Grafana, and Prometheus**, all provisioned via a **GitHub Actions CI/CD pipeline**.
+This project is my first hands-on experience with Kubernetes. It showcases a full end-to-end infrastructure setup using **Terraform, GKE, Kubernetes, Helm, NGINX Ingress, Grafana, and Prometheus**, all provisioned via a **GitHub Actions CI/CD pipeline**.
 
 It is designed to be **educational, reusable, and production-ready** for learning, prototyping, or as a foundation for real-world workloads on GKE with modern DevOps practices.
 
-## Why this project is worth exploring
+## Project Goals & Architecture Rationale
 
-This repository is especially useful for beginners who want a realistic introduction to Kubernetes and DevOps practices. It showcases:
+This project is designed with **learning, best practices, and real-world relevance** in mind. It provides a hands-on, end-to-end example of deploying a cloud-native application on Kubernetes, while leveraging modern DevOps tooling.
 
-- IaC with Terraform for cloud infrastructure provisioning.
-- Deployment of Kubernetes applications with Helm and overlays for multiple environments.
-- Set up of CI/CD pipelines with GitHub Actions for automated deployments.
-- Implementation of observability with Prometheus and Grafana, a crucial skill in production operations.
-- Best practices in security, scalability, and maintainability from the start.
+### Why This Architecture?
 
-In short, it’s a hands-on learning playground that mirrors professional workflows without overwhelming complexity.
+* **GKE (Google Kubernetes Engine):**
+  GKE makes Kubernetes **easy to use for beginners**. It abstracts away complex cluster setup and maintenance (“plumbing”), allowing you to **focus on learning Kubernetes concepts, deployments, and CI/CD workflows**.
 
-## Key features
+* **Helm:**
+  Helm is widely used in real-world projects for packaging and deploying Kubernetes applications. It **prevents the need to rewrite hundreds of YAML manifests** and provides a standard, maintainable approach to app deployment. Using Helm here gives you first-hand experience with professional-grade tooling.
+
+* **NGINX Ingress:**
+  To make web applications accessible externally, we use NGINX Ingress. It provides **routing, TLS, and authentication** capabilities for services exposed to the internet.
+
+* **Prometheus, Grafana & ServiceMonitors:**
+  Observability is a key part of production-ready deployments. Prometheus collects metrics, Grafana visualizes them, and ServiceMonitors simplify metric discovery. This setup gives you a **full monitoring stack** to track cluster health and application performance.
+
+### Why This Project is Worth Exploring
+
+This repository is **especially useful for beginners** who want a realistic introduction to Kubernetes and DevOps practices. By following it, you will:
+
+* Learn **IaC with Terraform** for cloud infrastructure provisioning.
+* Deploy **Kubernetes applications with Helm and overlays** for multiple environments.
+* Set up **CI/CD pipelines with GitHub Actions** for automated deployments.
+* Implement **observability with Prometheus and Grafana**, a crucial skill in production operations.
+* Understand **best practices in security, scalability, and maintainability** from the start.
+
+In short, it’s a **hands-on learning playground** that mirrors professional workflows without overwhelming complexity.
+
+## Key Features
 
 * **Production-Ready Patterns:** Implements cloud-native best practices with declarative IaC, environment overlays, and automated CI/CD.
 * **Scalability & Flexibility:** Easily extendable to more environments, services, or cloud providers.
@@ -30,12 +48,11 @@ In short, it’s a hands-on learning playground that mirrors professional workfl
 * **Security:** Grafana Ingress is secured with basic auth, and secrets are managed via GitHub Actions and Kubernetes.
 * **Learning & Reusability:** Serves as a reference for real-world GKE deployments, Terraform usage, and Kubernetes operations. Can be adapted for other apps or teams.
 
-## Architecture overview
+## Architecture Overview
 
 This project provisions a **GKE cluster using Terraform** and deploys the [podinfo](https://github.com/stefanprodan/podinfo) demo application with Kubernetes manifests and Helm. It also sets up an **observability stack** (Prometheus & Grafana) and a secure NGINX Ingress.
 
 ![Podinfo-demo diagram](./docs/podinfo-demo.png "Cluster Diagram")
-
 
 ## Project Structure
 
@@ -58,107 +75,60 @@ infra-podinfo-demo/
     └── modules/             # Reusable Terraform modules (gke)
 ```
 
-## Goals and architecture rationale
-
-### Why?
-
-**GKE (Google Kubernetes Engine)**
-GKE makes Kubernetes easy to use for beginners. It abstracts away complex cluster setup and maintenance (“plumbing”), allowing you to focus on learning Kubernetes concepts, deployments, and CI/CD workflows.
-
-**Helm**
-Helm is widely used in real-world projects for packaging and deploying Kubernetes applications. It prevents the need to rewrite hundreds of YAML manifests and provides a standard, maintainable approach to app deployment. Using Helm here gives you first-hand experience with professional-grade tooling.
-
-**NGINX Ingress**
-To make web applications accessible externally. It provides routing, TLS, and authentication capabilities for services exposed to the internet.
-
-**Prometheus, Grafana & ServiceMonitors**
-Observability is a key part of production-ready deployments. Prometheus collects metrics, Grafana visualizes them, and ServiceMonitors simplify metric discovery. This setup gives a full monitoring stack to track cluster health and application performance.
-
-
 ## Getting Started
+
+This guide will help you **provision infrastructure, deploy the podinfo application, and access observability tools** using the CI/CD pipeline.
 
 ### Required Environment Variables for CI/CD Pipeline
 
-| Variable Name      | Description                                  | Example Value / Notes                                      |
-| ------------------ | -------------------------------------------- | ---------------------------------------------------------- |
-| GCP_SA_KEY         | Google Cloud service account key (JSON)      | (Secret) JSON string                                       |
-| GCP_PROJECT_ID     | Google Cloud project ID                      | my-gcp-project-id                                          |
-| GKE_CLUSTER_NAME   | Name of the GKE cluster                      | my-gke-cluster                                             |
-| GCP_ZONE           | GCP zone for the cluster                     | us-central1-a                                              |
-| GCP_REGION         | GCP region for the cluster                   | us-central1                                                |
-| GRAFANA_BASIC_AUTH | Grafana Ingress basic auth (htpasswd output) | admin:$apr1$... // see section How to Set Up Observability |
+The pipeline depends on a few environment variables, which you must set as **GitHub repository secrets** under **Settings > Secrets and variables > Actions**:
 
-These variables must be set as GitHub repository secrets for the pipeline to run successfully. You can configure them in your repository under **Settings > Secrets and variables > Actions**.
+| Variable Name      | Description                                  | Example Value / Notes                                                      |
+| ------------------ | -------------------------------------------- | -------------------------------------------------------------------------- |
+| GCP_SA_KEY         | Google Cloud service account key (JSON)      | (Secret) JSON string                                                       |
+| GCP_PROJECT_ID     | Google Cloud project ID                      | my-gcp-project-id                                                          |
+| GKE_CLUSTER_NAME   | Name of the GKE cluster                      | my-gke-cluster                                                             |
+| GCP_ZONE           | GCP zone for the cluster                     | us-central1-a                                                              |
+| GCP_REGION         | GCP region for the cluster                   | us-central1                                                                |
+| GRAFANA_BASIC_AUTH | Grafana Ingress basic auth (htpasswd output) | admin:$apr1$... // see [Observability Setup](#how-to-set-up-observability) |
 
 ### 1. Provision Infrastructure with Terraform
 
-To provision the GKE cluster and all supporting resources, simply run the CI/CD pipeline provided in this repository. The pipeline will automatically handle infrastructure creation, application deployment, and observability setup for you.
+The GKE cluster, Kubernetes resources, and observability stack are **fully automated via GitHub Actions**.
 
-You can trigger the pipeline manually from the GitHub Actions tab, or by using the workflow dispatch feature for your desired environment (e.g., dev, staging, prod).
+* Trigger the pipeline manually from the **GitHub Actions tab** or use the workflow dispatch for your desired environment (dev, staging, prod).
+* The pipeline will handle:
 
-### 2. Accessing Podinfo Application
+  * Creating the GKE cluster
+  * Deploying the podinfo application via Kubernetes manifests/Helm
+  * Setting up Prometheus, Grafana, and NGINX Ingress
 
-After deployment, you can access your app via the Ingress external IP:
+> 💡 **Tip:** Using GKE with Terraform and GitHub Actions gives you a professional DevOps workflow without manual steps.
 
-1. Get the external IP of the Ingress:
+### 2. Setting Up Grafana Password
 
-```sh
-gcloud container clusters get-credentials <cluster-name> --region <region> --project <project-id>
-kubectl get ingress -n dev
-```
+Before accessing Grafana, you need to generate a **basic auth password**:
 
-2. Find the `ADDRESS` column in the output. This is your app's external IP.
-
-3. Open your browser and visit:
-
-```
-http://<EXTERNAL_IP>/app/ # podinfo app
-```
-
-Replace `<EXTERNAL_IP>` with the value from step 2.
-
-For Grafana:
-
-```
-http://<EXTERNAL_IP>/grafana/ # Grafana dashboard
-```
-
-* Replace `<EXTERNAL_IP>` with the value from step 2
-* Enter the username and password generated via htpasswd during the [Observability Set Up](#how-to-set-up-observability)
-* To retrieve Grafana admin password:
-
-  ```sh
-  kubectl get secret monitoring-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode
-  ```
-
-## How to Set Up Observability
-
-### Grafana Ingress Basic Auth Setup
-
-#### 1. Generate Basic Auth Credentials
+1. Generate the credentials:
 
 ```sh
 htpasswd -nb <username> <password>
 ```
 
-This will output a string like `user:$apr1$...`.
+This outputs a string like:
 
-#### 2. Set Up GitHub Actions Secret
-
-* Go to your repository on GitHub
-* Navigate to **Settings** > **Secrets and variables** > **Actions**
-* Click **New repository secret**
-* Name the secret: `GRAFANA_BASIC_AUTH`
-* Paste the generated value as the secret value
-
-#### 3. Reference the Secret in GitHub Actions
-
-```yaml
-env:
-  GRAFANA_BASIC_AUTH: ${{ secrets.GRAFANA_BASIC_AUTH }}
+```
+admin:$apr1$xyz123...
 ```
 
-Use this value when creating the Kubernetes secret for Grafana Ingress basic auth:
+2. Save this as a **GitHub Actions secret**:
+
+* Go to your repository → **Settings > Secrets and variables > Actions**
+* Click **New repository secret**
+* Name it `GRAFANA_BASIC_AUTH`
+* Paste the generated string as the value
+
+3. The pipeline will use this secret to create a Kubernetes secret for Grafana:
 
 ```sh
 kubectl create secret generic grafana-basic-auth \
@@ -166,17 +136,52 @@ kubectl create secret generic grafana-basic-auth \
   -n monitoring
 ```
 
-### Accessing Prometheus UI
+### 3. Accessing Podinfo Application and Grafana
 
-To access Prometheus running in your cluster, use kubectl port-forward:
+Once the deployment completes:
+
+1. Configure kubectl for your cluster:
+
+```sh
+gcloud container clusters get-credentials <cluster-name> --region <region> --project <project-id>
+```
+
+2. Get the external IP of the Ingress:
+
+```sh
+kubectl get ingress -n dev
+```
+
+3. Open your browser:
+
+```
+http://<EXTERNAL_IP>/app/      # Podinfo application
+http://<EXTERNAL_IP>/grafana/  # Grafana dashboard
+```
+
+* Replace `<EXTERNAL_IP>` with the `ADDRESS` value from the previous command.
+* Log in to Grafana using the **username/password** you generated in the previous step.
+* On the grafana dashboard, you can retrieve the username/password from Kubernetes (this is not same set of credentials as previous step):
+
+```sh
+kubectl get secret monitoring-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode
+```
+
+### 4. Accessing Prometheus UI
+
+To inspect metrics collected from your cluster and app:
 
 ```sh
 kubectl port-forward svc/prometheus -n monitoring 9090:9090
 ```
 
-Then open your browser and visit: `http://localhost:9090`
+Then open your browser:
 
-This will give you access to the Prometheus dashboard for exploring metrics collected from your cluster and applications.
+```
+http://localhost:9090
+```
+
+This gives you full access to the **Prometheus dashboard**.
 
 ## References
 
