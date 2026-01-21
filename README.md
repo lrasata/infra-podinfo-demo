@@ -22,25 +22,8 @@ It is designed to be **educational, reusable, and production-ready** for learnin
 
 This project provisions a **GKE cluster using Terraform** and deploys the [podinfo](https://github.com/stefanprodan/podinfo) demo application with Kubernetes manifests and Helm. It also sets up an **observability stack** (Prometheus & Grafana) and a secure NGINX Ingress.
 
-```
-┌─────────────────────────────┐
-│      Google Cloud (GCP)     │
-│ ┌─────────────────────────┐ │
-│ │      GKE Cluster        │ │
-│ │ ┌─────────────────────┐ │ │
-│ │ │   podinfo app       │ │ │
-│ │ └─────────────────────┘ │ │
-│ │ ┌─────────────────────┐ │ │
-│ │ │ Observability stack │ │ │
-│ │ │ (Grafana,           │ │ │
-│ │ │  Prometheus)        │ │ │
-│ │ └─────────────────────┘ │ │
-│ │ ┌─────────────────────┐ │ │
-│ │ │   Ingress (NGINX)   │ │ │
-│ │ └─────────────────────┘ │ │
-│ └─────────────────────────┘ │
-└─────────────────────────────┘
-```
+![Podinfo-demo diagram](./docs/podinfo-demo.png "Cluster Diagram")
+
 
 ## Project Structure
 
