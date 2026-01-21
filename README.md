@@ -6,11 +6,23 @@
 
 ## Overview
 
-This project is my first hands-on experience with Kubernetes. It showcases a full end-to-end infrastructure setup using **Terraform, GKE, Kubernetes, Helm, NGINX Ingress, Grafana, and Prometheus**, all provisioned via a **GitHub Actions CI/CD pipeline**.
+This project is beginner-friendly hands-on experience with Kubernetes. It showcases a full end-to-end infrastructure setup using **Terraform, GKE, Kubernetes, Helm, NGINX Ingress, Grafana, and Prometheus**, all provisioned via a **GitHub Actions CI/CD pipeline**.
 
 It is designed to be **educational, reusable, and production-ready** for learning, prototyping, or as a foundation for real-world workloads on GKE with modern DevOps practices.
 
-## Key Features
+## Why this project is worth exploring
+
+This repository is especially useful for beginners who want a realistic introduction to Kubernetes and DevOps practices. It showcases:
+
+- IaC with Terraform for cloud infrastructure provisioning.
+- Deployment of Kubernetes applications with Helm and overlays for multiple environments.
+- Set up of CI/CD pipelines with GitHub Actions for automated deployments.
+- Implementation of observability with Prometheus and Grafana, a crucial skill in production operations.
+- Best practices in security, scalability, and maintainability from the start.
+
+In short, it’s a hands-on learning playground that mirrors professional workflows without overwhelming complexity.
+
+## Key features
 
 * **Production-Ready Patterns:** Implements cloud-native best practices with declarative IaC, environment overlays, and automated CI/CD.
 * **Scalability & Flexibility:** Easily extendable to more environments, services, or cloud providers.
@@ -18,7 +30,7 @@ It is designed to be **educational, reusable, and production-ready** for learnin
 * **Security:** Grafana Ingress is secured with basic auth, and secrets are managed via GitHub Actions and Kubernetes.
 * **Learning & Reusability:** Serves as a reference for real-world GKE deployments, Terraform usage, and Kubernetes operations. Can be adapted for other apps or teams.
 
-## Architecture Overview
+## Architecture overview
 
 This project provisions a **GKE cluster using Terraform** and deploys the [podinfo](https://github.com/stefanprodan/podinfo) demo application with Kubernetes manifests and Helm. It also sets up an **observability stack** (Prometheus & Grafana) and a secure NGINX Ingress.
 
@@ -45,6 +57,23 @@ infra-podinfo-demo/
     │   └── prod/
     └── modules/             # Reusable Terraform modules (gke)
 ```
+
+## Goals and architecture rationale
+
+### Why?
+
+**GKE (Google Kubernetes Engine)**
+GKE makes Kubernetes easy to use for beginners. It abstracts away complex cluster setup and maintenance (“plumbing”), allowing you to focus on learning Kubernetes concepts, deployments, and CI/CD workflows.
+
+**Helm**
+Helm is widely used in real-world projects for packaging and deploying Kubernetes applications. It prevents the need to rewrite hundreds of YAML manifests and provides a standard, maintainable approach to app deployment. Using Helm here gives you first-hand experience with professional-grade tooling.
+
+**NGINX Ingress**
+To make web applications accessible externally. It provides routing, TLS, and authentication capabilities for services exposed to the internet.
+
+**Prometheus, Grafana & ServiceMonitors**
+Observability is a key part of production-ready deployments. Prometheus collects metrics, Grafana visualizes them, and ServiceMonitors simplify metric discovery. This setup gives a full monitoring stack to track cluster health and application performance.
+
 
 ## Getting Started
 
@@ -136,6 +165,18 @@ kubectl create secret generic grafana-basic-auth \
   --from-literal=auth="${GRAFANA_BASIC_AUTH}" \
   -n monitoring
 ```
+
+### Accessing Prometheus UI
+
+To access Prometheus running in your cluster, use kubectl port-forward:
+
+```sh
+kubectl port-forward svc/prometheus -n monitoring 9090:9090
+```
+
+Then open your browser and visit: `http://localhost:9090`
+
+This will give you access to the Prometheus dashboard for exploring metrics collected from your cluster and applications.
 
 ## References
 
