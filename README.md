@@ -60,20 +60,29 @@ This project provisions a **GKE cluster using Terraform** and deploys the [podin
 infra-podinfo-demo/
 ├── kubernetes/
 │   ├── base/                # Base Kubernetes manifests (ingress, podinfo, etc.)
-│   └── overlays/            # Environment-specific overlays (dev, staging, prod)
+│   └── overlays/            # Environment-specific overlays (dev, staging)
 │       ├── dev/
-│       ├── staging/
-│       └── prod/
+│       └── staging/
 ├── observability/
 │   ├── grafana/             # Grafana configuration
 │   └── prometheus/          # Prometheus configuration
 └── terraform/
     ├── live/                # Live environment deployments
     │   ├── dev/
-    │   ├── staging/
-    │   └── prod/
+    │   └── staging/
     └── modules/             # Reusable Terraform modules (gke)
 ```
+
+## Why separate clusters for each environment
+
+For this demo project, we use **separate clusters for `dev` and `staging`**.
+
+* This keeps each environment **fully isolated** — changes in dev cannot affect staging.
+* It allows us to **reuse the same manifests** across environments without worrying about conflicts.
+* Using separate clusters makes the setup **simpler for beginners**, as you don’t need to learn additional tools like Kustomize or Helm overlays at this stage.
+
+> 💡 In a real-world project, you probably would use **Kustomize, Helm, or environment variables** to manage multiple environments in a single cluster. This is definitely something I plan to try as a **next step in the learning path**.
+
 
 ## Getting Started
 
