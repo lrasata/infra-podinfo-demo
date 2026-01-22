@@ -1,6 +1,4 @@
-# infra-podinfo-demo 🚧
-
-> 🚧 Construction in progress
+# infra-podinfo-demo
 
 ![Setup GKE cluster](https://github.com/lrasata/infra-podinfo-demo/actions/workflows/setup-cluster.yaml/badge.svg)
 
@@ -52,6 +50,9 @@ In short, it’s a **hands-on learning playground** that mirrors professional wo
 
 This project provisions a **GKE cluster using Terraform** and deploys the [podinfo](https://github.com/stefanprodan/podinfo) demo application with Kubernetes manifests and Helm. It also sets up an **observability stack** (Prometheus & Grafana) and a secure NGINX Ingress.
 
+> 💡 Podinfo is a tiny web application made with Go that showcases best practices of running microservices in Kubernetes. Podinfo is used by CNCF projects for end-to-end testing and workshops.
+
+
 ![Podinfo-demo diagram](./docs/podinfo-demo.png "Cluster Diagram")
 
 ## Project Structure
@@ -99,7 +100,7 @@ The pipeline depends on a few environment variables, which you must set as **Git
 | GKE_CLUSTER_NAME   | Name of the GKE cluster                      | my-gke-cluster                                                             |
 | GCP_ZONE           | GCP zone for the cluster                     | us-central1-a                                                              |
 | GCP_REGION         | GCP region for the cluster                   | us-central1                                                                |
-| GRAFANA_BASIC_AUTH | Grafana Ingress basic auth (htpasswd output) | admin:$apr1$... // see [Observability Setup](#how-to-set-up-observability) |
+| GRAFANA_BASIC_AUTH | Grafana Ingress basic auth (htpasswd output) | admin:$apr1$... // see Setting Up Grafana Passwor section                  |
 
 ### 1. Provision Infrastructure with Terraform
 
