@@ -1,7 +1,7 @@
 terraform {
   backend "gcs" {
     bucket = "terraform-state-podinfo-demo"
-    prefix = "terraform/state/${var.env}"
+    prefix = "terraform/state/dev"
   }
 }
 
