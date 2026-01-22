@@ -14,6 +14,7 @@ resource "google_container_node_pool" "podinfo_cluster_nodes" {
 
   node_config {
     machine_type = var.machine_type
+    disk_size_gb = 50 
     oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 }
