@@ -1,3 +1,3 @@
 output "kubeconfig" {
-  value = google_container_cluster.primary.endpoint
+  value = google_container_cluster.podinfo_cluster.endpoint
 }
