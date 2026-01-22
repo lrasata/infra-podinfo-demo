@@ -129,10 +129,10 @@ jobs:
 
       - run: |
           helm upgrade --install podinfo podinfo/podinfo \
-            --namespace dev \
+            --namespace podinfo \
             --create-namespace \
             --wait \
-            -f kubernetes/overlays/dev/values.yaml
+            -f kubernetes/overlays/${{ github.event.inputs.environment }}/values.yaml
 
       - run: kubectl apply -f kubernetes/base/ingress/podinfo-ingress.yaml
 
