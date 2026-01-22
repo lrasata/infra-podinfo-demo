@@ -152,19 +152,19 @@ Once the deployment completes:
 1. Configure kubectl for your cluster:
 
 ```sh
-gcloud container clusters get-credentials <cluster-name> --region <region> --project <project-id>
+gcloud container clusters get-credentials <cluster-name> --zone <zone> --project <project-id>
 ```
 
 2. Get the external IP of the Ingress:
 
 ```sh
-kubectl get ingress -n dev
+kubectl get ingress -n podinfo
 ```
 
 3. Open your browser:
 
 ```
-http://<EXTERNAL_IP>/app/      # Podinfo application
+http://<EXTERNAL_IP>/      # Podinfo application
 http://<EXTERNAL_IP>/grafana/  # Grafana dashboard
 ```
 
