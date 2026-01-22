@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: podinfo-servicemonitor
-  namespace: dev
+  namespace: podinfo
   labels:
     release: monitoring
 spec:
@@ -11,7 +11,7 @@ spec:
       app: podinfo
   namespaceSelector:
     matchNames:
-      - dev
+      - podinfo
   endpoints:
     - port: metrics
       path: /metrics

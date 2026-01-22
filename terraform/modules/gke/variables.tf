@@ -17,7 +17,8 @@ variable "cluster_name" {
 variable "node_count" {
   type = number
 }
+
 variable "machine_type" {
   type    = string
-  default = "e2-micro" # free-tier eligible
+  default = "e2-micro" # free-tier eligible - sometimes not enough for workloads
 }

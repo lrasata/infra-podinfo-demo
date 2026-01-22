@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - dev
+          - staging
 
 jobs:
   destroy:
@@ -16,15 +17,15 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     env:
       GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
-      ZONE: ${{ secrets.GCP_ZONE }}
-      TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-      TF_VAR_cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
-      TF_VAR_region: ${{ secrets.GCP_REGION }}
-      TF_VAR_zone: ${{ secrets.GCP_ZONE }}
-      TF_VAR_node_count: 1
-      TF_VAR_machine_type: "e2-small"
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME }}
+      ZONE: ${{ vars.GCP_ZONE }}
+      TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
+      TF_VAR_cluster_name: ${{ vars.GKE_CLUSTER_NAME }}
+      TF_VAR_region: ${{ vars.GCP_REGION }}
+      TF_VAR_zone: ${{ vars.GCP_ZONE }}
+      TF_VAR_node_count: ${{ github.event.inputs.environment == 'staging' && 2 || 1 }}
+      TF_VAR_machine_type: "e2-medium"
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

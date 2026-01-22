@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: podinfo-alerts
-  namespace: dev   # <-- same namespace as podinfo
+  namespace: podinfo   # <-- same namespace as podinfo
   labels:
     release: monitoring # <-- must match Prometheus release selector
 spec:

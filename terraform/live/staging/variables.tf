@@ -18,7 +18,7 @@ variable "cluster_name" {
 
 variable "node_count" {
   type    = number
-  default = 1
+  default = 2
 }
 
 variable "machine_type" {
@@ -28,5 +28,5 @@ variable "machine_type" {
 
 variable "env" {
   type    = string
-  default = "dev"
+  default = "staging"
 }
