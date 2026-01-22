@@ -170,18 +170,22 @@ http://<EXTERNAL_IP>/grafana/  # Grafana dashboard
 
 * Replace `<EXTERNAL_IP>` with the `ADDRESS` value from the previous command.
 * Log in to Grafana using the **username/password** you generated in the previous step.
+![Grafana Ingress basich auth](./docs/grafana-ingress-auth.png "Grafana basic auth")
 * On the grafana dashboard, you can retrieve the username/password from Kubernetes (this is not same set of credentials as previous step):
 
 ```sh
 kubectl get secret monitoring-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode
 ```
 
+![Grafana login](./docs/grafana-login.png "Grafana login")
+![Grafana dashboard](./docs/grafana.png "Grafana dashbaord")
+
 ### 4. Accessing Prometheus UI
 
 To inspect metrics collected from your cluster and app:
 
 ```sh
-kubectl port-forward svc/prometheus -n monitoring 9090:9090
+kubectl port-forward svc/monitoring-kube-prometheus-prometheus -n monitoring 9090:9090
 ```
 
 Then open your browser:
@@ -189,6 +193,8 @@ Then open your browser:
 ```
 http://localhost:9090
 ```
+
+![Prometehus dashboard](./docs/prometheus.png "Prometheus Health Target")
 
 This gives you full access to the **Prometheus dashboard**.
 
